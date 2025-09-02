@@ -1,0 +1,26 @@
+# Configurações do JIRA
+JIRA_URL=https://seu-dominio.atlassian.net
+JIRA_USERNAME=seu-email@empresa.com
+JIRA_API_TOKEN=seu-token-api-jira
+JIRA_PROJECT_KEY=PROJ
+JIRA_ISSUE_TYPE=Bug
+
+# Configurações de Email
+SMTP_SERVER=smtp.gmail.com
+SMTP_PORT=587
+EMAIL_USERNAME=seu-email@gmail.com
+EMAIL_PASSWORD=sua-senha-app
+FROM_EMAIL=seu-email@gmail.com
+USE_TLS=true
+
+# Configurações do Banco de Dados
+DATABASE_URL=sqlite:///incidents.db
+
+# Configurações de Incidentes
+FAILURE_THRESHOLD=3
+TIME_WINDOW_HOURS=24
+REMINDER_DAYS=7,14,30
+
+# Configurações de Log
+LOG_LEVEL=INFO
+LOG_FILE=incidents.log

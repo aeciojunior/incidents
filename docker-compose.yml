@@ -1,0 +1,77 @@
+version: '3.8'
+
+services:
+  incidents-system:
+    build: .
+    container_name: incidents-management
+    ports:
+      - "5000:5000"
+    environment:
+      # Configurações do JIRA
+      - JIRA_URL=${JIRA_URL}
+      - JIRA_USERNAME=${JIRA_USERNAME}
+      - JIRA_API_TOKEN=${JIRA_API_TOKEN}
+      - JIRA_PROJECT_KEY=${JIRA_PROJECT_KEY}
+      - JIRA_ISSUE_TYPE=${JIRA_ISSUE_TYPE:-Bug}
+      
+      # Configurações de Email
+      - SMTP_SERVER=${SMTP_SERVER}
+      - SMTP_PORT=${SMTP_PORT:-587}
+      - EMAIL_USERNAME=${EMAIL_USERNAME}
+      - EMAIL_PASSWORD=${EMAIL_PASSWORD}
+      - FROM_EMAIL=${FROM_EMAIL}
+      - USE_TLS=${USE_TLS:-true}
+      
+      # Configurações do Banco de Dados
+      - DATABASE_URL=${DATABASE_URL:-sqlite:///incidents.db}
+      
+      # Configurações de Incidentes
+      - FAILURE_THRESHOLD=${FAILURE_THRESHOLD:-3}
+      - TIME_WINDOW_HOURS=${TIME_WINDOW_HOURS:-24}
+      - REMINDER_DAYS=${REMINDER_DAYS:-7,14,30}
+      
+      # Configurações de Log
+      - LOG_LEVEL=${LOG_LEVEL:-INFO}
+      - LOG_FILE=${LOG_FILE:-incidents.log}
+    volumes:
+      - ./data:/app/data
+      - ./logs:/app/logs
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "python", "-c", "import requests; requests.get('http://localhost:5000/health')"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+
+  # Opcional: Banco de dados PostgreSQL
+  postgres:
+    image: postgres:15-alpine
+    container_name: incidents-postgres
+    environment:
+      - POSTGRES_DB=incidents
+      - POSTGRES_USER=incidents_user
+      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD:-incidents_pass}
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    ports:
+      - "5432:5432"
+    restart: unless-stopped
+    profiles:
+      - postgres
+
+  # Opcional: Redis para cache
+  redis:
+    image: redis:7-alpine
+    container_name: incidents-redis
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
+    restart: unless-stopped
+    profiles:
+      - redis
+
+volumes:
+  postgres_data:
+  redis_data:
